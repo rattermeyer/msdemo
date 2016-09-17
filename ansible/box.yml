@@ -1,0 +1,27 @@
+---
+- hosts: all
+  roles:
+    - { role: rattermeyer.docker, docker_group_members: ["vagrant"], pip_version_docker_py: 1.9.0 }
+  tasks:
+    - name: ensure consul data directory exists
+      file:
+        path: "{{item}}"
+        state: directory
+        owner: libuuid
+        group: vagrant
+      with_items:
+        - "/data/consul/data"
+        - "/data/consul/config"
+    - name: start consul container
+      docker_container:
+        name: consul
+        image: "consul:v0.6.4"
+        network_mode: host
+        volumes:
+          - "/data/consul/data:/consul/data"
+          - "/data/consul/config:/consul/config"
+        command: "agent -server -bind=192.168.33.10 -client=192.168.33.10 -ui -bootstrap-expect=1"
+        recreate: yes
+
+  become: yes
+  become_user: root
