@@ -26,6 +26,7 @@
 
 	<modules>
 		<module>benutzer</module>
+		<module>user</module>
 	</modules>
 
 	<dependencyManagement>
