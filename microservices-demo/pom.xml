@@ -25,7 +25,6 @@
 	</properties>
 
 	<modules>
-		<module>benutzer</module>
 		<module>user</module>
 	</modules>
 
@@ -55,6 +54,13 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>pl.project13.maven</groupId>
+				<artifactId>git-commit-id-plugin</artifactId>
+				<configuration>
+					<dotGitDirectory>${project.parent.relativePath}/../.git</dotGitDirectory>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

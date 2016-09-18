@@ -1,3 +1,7 @@
 spring:
   application:
     name: user
+management:
+  port: 8081
+  security:
+    enabled: false
