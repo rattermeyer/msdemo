@@ -5,3 +5,6 @@ management:
   port: 8081
   security:
     enabled: false
+endpoints:
+  health:
+    sensitive: false
