@@ -1,0 +1,22 @@
+---
+- hosts: localhost
+  tasks:
+    - name: create directory
+      file:
+        path: "/data/apps/user/{{user_version}}"
+        state: directory
+    - name: Download application
+      maven_artifact:
+        group_id: de.rattermeyer.demo.ms
+        artifact_id: user
+        version: "{{user_version}}"
+        repository_url: http://192.168.33.10:8081/nexus/content/repositories/snapshots/
+        dest: /data/apps/user/{{user_version}}/user-{{user_version}}.jar
+    - name: Start application
+      shell: java -Dspring.profiles.active=dev -jar /data/apps/user/{{user_version}}/user-{{user_version}}.jar --management.port=18081
+      environment:
+        - TAG: a2bd4e
+      async: 1000
+      poll: 0
+  vars:
+    user_version: "0.0.1-SNAPSHOT"

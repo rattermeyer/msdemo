@@ -1,17 +1,39 @@
 ---
 - hosts: all
+  pre_tasks:
+    - name: "install additional modules"
+      apt: name="python-lxml"
   roles:
-    - { role: rattermeyer.docker, docker_group_members: ["vagrant"], pip_version_docker_py: 1.9.0 }
+    - {
+      role: rattermeyer.docker, docker_group_members: ["vagrant"], pip_version_docker_py: 1.9.0,
+      docker_opts: "-H unix:// -H tcp://0.0.0.0:2375 --insecure-registry 192.168.33.10:5000",
+      tags: docker
+      }
+    - williamyeh.oracle-java
   tasks:
     - name: ensure consul data directory exists
       file:
-        path: "{{item}}"
+        path: "{{item.key}}"
         state: directory
-        owner: libuuid
-        group: vagrant
-      with_items:
-        - "/data/consul/data"
-        - "/data/consul/config"
+        owner: "{{item.value.owner}}"
+        group: "{{item.value.group}}"
+      with_dict:
+        "/data/consul/data":
+          owner: libuuid
+          group: vagrant
+        "/data/consul/config":
+          owner: libuuid
+          group: vagrant
+        "/data/registry/images":
+          owner: root
+          group: root
+        "/data/nexus/sonatype-work":
+          owner: 200
+          group: 200
+      tags:
+        - nexus
+        - consul
+        - registry
     - name: start consul container
       docker_container:
         name: consul
@@ -22,6 +44,46 @@
           - "/data/consul/config:/consul/config"
         command: "agent -server -bind=192.168.33.10 -client=192.168.33.10 -ui -bootstrap-expect=1"
         recreate: yes
+        state: started
+        published_ports:
+          - "8500:8500"
+      tags:
+        - consul
+    - name: get registry image
+      docker_image:
+        name: registry
+        tag: 2
+      tags:
+        - registry
+    - name: start registry container
+      docker_container:
+        name: registry
+        image: registry:2
+        volumes:
+          - "/data/registry/images:/tmp/registry-dev"
+        recreate: yes
+        state: started
+        published_ports:
+          - "5000:5000"
+      tags:
+        - registry
+    - name: pull image sonatype nexus
+      docker_image:
+        name: sonatype/nexus
+        repository: sonatype
+      tags:
+        - nexus
+    - name: start sonatype nexus
+      docker_container:
+        name: nexus
+        image: sonatype/nexus
+        volumes:
+          - "/data/nexus/sonatype-work:/sonatype-work"
+        published_ports:
+          - "8081:8081"
+        state: started
+      tags:
+        - nexus
 
   become: yes
   become_user: root

@@ -19,6 +19,14 @@
     </parent>
 
 
+    <distributionManagement>
+        <snapshotRepository>
+            <id>msdemo</id>
+            <url>http://192.168.33.10:8081/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
